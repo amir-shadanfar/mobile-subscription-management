@@ -1,0 +1,49 @@
+version: '2'
+
+services:
+
+  data:
+    build: ./data
+    volumes:
+      - ../../src:/www
+    command: /var/local/entrypoint.sh
+
+  php:
+    build: ./php
+    volumes_from:
+      - data
+    command: /var/local/entrypoint.sh
+
+  mysql:
+    build: ./mysql
+    volumes:
+      - ../../mysqldata:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_DATABASE=db
+      - MYSQL_ROOT_PASSWORD=123456
+    ports:
+      - "8006:3306"
+    command: --sql_mode=""
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "8001:80"
+    links:
+      - php
+      - mysql
+    volumes_from:
+      - php
+      - data
+
+  redis:
+    build: ./redis
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8002:80"
+    environment:
+      - PMA_HOST=mysql
+      - MYSQL_ROOT_PASSWORD=123456
