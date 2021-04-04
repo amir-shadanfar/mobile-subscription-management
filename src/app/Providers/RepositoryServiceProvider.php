@@ -35,7 +35,15 @@ class RepositoryServiceProvider extends ServiceProvider
             Repository::class
         );
 
+        $this->app->bind(
+            OsApiInterface::class,
+            AbstractOsApi::class
+        );
 
+        $this->app->bind(
+            OsTypeInterface::class,
+            AbstractOsType::class
+        );
 
     }
 }
