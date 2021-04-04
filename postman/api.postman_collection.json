@@ -1,0 +1,111 @@
+{
+	"info": {
+		"_postman_id": "f8d4bb47-0ad6-4b54-8feb-402ebcf7184d",
+		"name": "api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"uid\":\"WZo6d58Xn6DxLT3rP2it\",\n    \"language\":\"en\",\n    \"os\":\"android\",\n    \"appId\":\"WZo6d58Xn6DxLT3rP2it\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8001/api/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8001",
+					"path": [
+						"api",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "setSubscription",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "client-token",
+						"value": "a2df640d126cbc9b52f7fed44aa0c87f14809697",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"receipt\":\"WZo6d58Xn6DxLT3rP2it1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8001/api/subscribe",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8001",
+					"path": [
+						"api",
+						"subscribe"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getSubscription",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "client-token",
+						"type": "text",
+						"value": "a2df640d126cbc9b52f7fed44aa0c87f14809697"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"receipt\":\"WZo6d58Xn6DxLT3rP2it\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8001/api/subscribe",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8001",
+					"path": [
+						"api",
+						"subscribe"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
