@@ -6,6 +6,7 @@ use App\Application;
 use App\Device;
 use App\Enums\SubscriptionStatusEnum;
 use App\Jobs\SubscriptionCheckJob;
+use App\Repositories\Device\DeviceRepository;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -25,14 +26,16 @@ class SubscriptionCheckCommand extends Command
      */
     protected $description = 'Check all subscriptions expire date';
 
+    public $deviceRepository;
+
     /**
-     * Create a new command instance.
-     *
-     * @return void
+     * SubscriptionCheckCommand constructor.
+     * @param DeviceRepository $deviceRepository
      */
-    public function __construct()
+    public function __construct(DeviceRepository $deviceRepository)
     {
         parent::__construct();
+        $this->deviceRepository = $deviceRepository;
     }
 
     /**
@@ -45,15 +48,18 @@ class SubscriptionCheckCommand extends Command
             Device::with(['applications' => function ($q) use ($application) {
                 $q->where('id', $application->id);
             }])
-                ->chunk(1000, function ($device) {
+                ->chunk(1000, function ($devices) {
+                    foreach ($devices as $device) {
+                        if ($device->applications->first()) {
+                            $now = Carbon::now();// UTC
 
-                    $now = Carbon::now();
-                    $pivot = $device->application->first()->pivot;
+                            $pivot = $device->applications->first()->pivot;
 
-                    if (!is_null($pivot->subscription_expire_date) && ($pivot->subscription_status !== SubscriptionStatusEnum::CANCELED) && $now->greaterThanOrEqualTo($pivot->subscription_expire_date)) {
-                        dispatch(new SubscriptionCheckJob($device));
+                            if (!is_null($pivot->subscription_expire_date) && ($pivot->subscription_status !== SubscriptionStatusEnum::CANCELED) && $now->greaterThanOrEqualTo($pivot->subscription_expire_date)) {
+                                dispatch(new SubscriptionCheckJob($device, $this->deviceRepository));
+                            }
+                        }
                     }
-
                 });
         }
 

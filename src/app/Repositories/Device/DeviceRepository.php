@@ -74,13 +74,22 @@ class DeviceRepository extends Repository
 
         $pivot = $device->applications->first()->pivot;
 
+        // status
+        if (isset($data['subscription_status'])) {
+            $updateField = ['subscription_status' => $data['subscription_status']];
+        } else {
+            $updateField = ['subscription_status' => is_null($pivot->subscription_expire_date) ? SubscriptionStatusEnum::STARTED : SubscriptionStatusEnum::RENEWED];
+        }
+
+        // expire date
+        if (isset($data['subscription_expire_date'])) {
+            $updateField = ['subscription_expire_date' => $data['subscription_expire_date']];
+        }
+
         DB::table('applications_devices')
             ->where('device_id', $data['device_id'])
             ->where('application_id', $data['application_id'])
-            ->update([
-                'subscription_status'      => is_null($pivot->subscription_expire_date) ? SubscriptionStatusEnum::STARTED : SubscriptionStatusEnum::RENEWED,
-                'subscription_expire_date' => $data['subscription_expire_date']
-            ]);
+            ->update($updateField);
     }
 
 }
