@@ -9,7 +9,13 @@ return [
         ApiTypeEnum::Mock => \App\Services\OS\Api\Mock\MockApiConnector::class,
     ],
     'config'    => [
-        'android_url' => env('ANDROID_API_URL', 'http://google.com'),
-        'ios_url'     => env('IOS_API_URL', 'http://apple.com'),
+        'android' => [
+            'receipt'      => env('ANDROID_RECEIPT_API_URL', 'http://google.com/receipt'),
+            'subscription' => env('ANDROID_SUBSCRIPTION_API_URL', 'http://google.com/subscription'),
+        ],
+        'ios'     => [
+            'receipt'      => env('IOS_RECEIPT_API_URL', 'http://apple.com.com/receipt'),
+            'subscription' => env('IOS_SUBSCRIPTION_API_URL', 'http://apple.com/subscription'),
+        ],
     ]
 ];
