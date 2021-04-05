@@ -31,6 +31,9 @@ class DeviceRepository extends Repository
         $device = parent::create($data);
 
         $application = $this->applicationRepo->find($data['code']);
+        if (!$application)
+            throw new \Exception('the appId is not valid');
+
         $device->applications()->attach($application->id);
 
         return $device;

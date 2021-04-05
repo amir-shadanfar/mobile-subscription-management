@@ -38,10 +38,11 @@ class CheckClientToken
                         'token' => $token
                     ], ['applications']);
 
-                    if (!$devices) {
+                    if (count($devices) < 1) {
                         throw new \Exception('The given token is not identified', 400);
                     } else {
                         $device = $devices->first();
+
                         Cache::put($token, [
                             'device_id'      => $device->id,
                             'device_os'      => $device->os,
