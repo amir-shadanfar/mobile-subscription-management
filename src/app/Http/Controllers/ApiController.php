@@ -113,8 +113,8 @@ class ApiController extends Controller
             $applicationId = $request->input('application_id');
 
             // call os api
-            $osTypeObj = OsTypeFactory::create($deviceOs);
-            $expireDate = $osTypeObj->callApi($request->input('receipt'));
+            $osTypeObj = OsTypeFactory::create($deviceOs, $applicationId);
+            $expireDate = $osTypeObj->checkReceipt($request->input('receipt'));
 
             // update subscription with expire date
             $this->deviceRepo->setSubscription([

@@ -7,16 +7,16 @@ class OsTypeFactory
     protected static $instance = [];
 
     /**
-     * make Factory class Singleton to save memory
-     *
      * @param string $type
+     * @param int $applicationId
      * @return OsTypeInterface
      */
-    public static function create(string $type): OsTypeInterface
+    public static function create(string $type, int $applicationId): OsTypeInterface
     {
         if (!isset(self::$instance[$type])) {
             $class = sprintf('\\%s\Handlers\\%sHandler', __NAMESPACE__, ucfirst($type));
-            self::$instance[$type] = app($class);
+
+            self::$instance[$type] = app($class, ['applicationId' => $applicationId]);
         }
         return self::$instance[$type];
     }

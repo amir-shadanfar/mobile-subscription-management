@@ -12,13 +12,13 @@ class AndroidHandler extends AbstractOsType
     protected $apiCredentials;
 
     /**
-     * AndroidHandler constructor.
      * @param OsCredentialRepository $osCredentialRepository
+     * @param $applicationId
      * @throws \Exception
      */
-    public function __construct(OsCredentialRepository $osCredentialRepository)
+    public function __construct(OsCredentialRepository $osCredentialRepository, $applicationId)
     {
-        parent::__construct($osCredentialRepository, $this->osType);
+        parent::__construct($osCredentialRepository, $this->osType, $applicationId);
     }
 
     /**
@@ -26,8 +26,18 @@ class AndroidHandler extends AbstractOsType
      * @return mixed
      * @throws \Exception
      */
-    public function callApi(string $receipt)
+    public function checkReceipt(string $receipt)
     {
-        return parent::callFactoryApi($receipt, $this->osType);
+        return parent::checkOsReceipt($receipt, $this->osType);
+    }
+
+    /**
+     * @param string $token
+     * @return string
+     * @throws \Exception
+     */
+    public function getSubscription(string $token)
+    {
+        return parent::getDeviceSubscription($token, $this->osType);
     }
 }

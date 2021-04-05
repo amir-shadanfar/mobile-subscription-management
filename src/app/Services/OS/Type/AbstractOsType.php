@@ -2,6 +2,7 @@
 
 namespace App\Services\OS\Type;
 
+use App\Enums\SubscriptionStatusMapper;
 use App\Repositories\OsCredential\OsCredentialRepository;
 use App\Services\OS\Api\OsApiFactory;
 use Carbon\Carbon;
@@ -16,17 +17,18 @@ abstract class AbstractOsType implements OsTypeInterface
      * AbstractOsType constructor.
      * @param OsCredentialRepository $osCredentialRepository
      * @param $osType
+     * @param $applicationId
      * @throws \Exception
      */
-    public function __construct(OsCredentialRepository $osCredentialRepository, $osType)
+    public function __construct(OsCredentialRepository $osCredentialRepository, $osType, $applicationId)
     {
-        $cachedKey = sprintf('%s-%s', $osType, request()->input('application_id'));
+        $cachedKey = sprintf('%s-%s', $osType, $applicationId);
 
         if (!Cache::has($cachedKey)) {
 
             $apiCredentialObj = $osCredentialRepository->filter([
                 'os'             => $osType,
-                'application_id' => request()->input('application_id')
+                'application_id' => $applicationId
             ])->first();
 
             if (!$apiCredentialObj) {
@@ -47,11 +49,10 @@ abstract class AbstractOsType implements OsTypeInterface
      * @return mixed
      * @throws \Exception
      */
-    public function callFactoryApi(string $receipt, string $osType)
+    public function checkOsReceipt(string $receipt, string $osType)
     {
         // factory
         $apiConnector = OsApiFactory::create();
-
         $response = $apiConnector->checkReceipt($receipt, $osType, [
             'Authorization: Basic ' . $this->apiCredentials
         ]);
@@ -59,7 +60,7 @@ abstract class AbstractOsType implements OsTypeInterface
         $contents = $response->getBody()->getContents();
 
         if ($response->getStatusCode() !== 200) {
-            $errorMessage = sprintf('Call %s API failed: %s', $this->osType, $contents);
+            $errorMessage = sprintf('check receipt of %s API failed: %s', $this->osType, $contents);
             Log::error($errorMessage);
             throw new \Exception($errorMessage);
         }
@@ -68,6 +69,34 @@ abstract class AbstractOsType implements OsTypeInterface
         $expireDateSource = $contents['response']['expire-date'];
 
         return $this->convertTimezones($expireDateSource);
+    }
+
+    /**
+     * @param string $token
+     * @param string $osType
+     * @return string
+     * @throws \Exception
+     */
+    public function getDeviceSubscription(string $token, string $osType)
+    {
+        // factory
+        $apiConnector = OsApiFactory::create();
+        $response = $apiConnector->getSubscription($token, $osType, [
+            'Authorization: Basic ' . $this->apiCredentials
+        ]);
+
+        $contents = $response->getBody()->getContents();
+
+        if ($response->getStatusCode() !== 200) {
+            $errorMessage = sprintf('get subscription of %s API failed: %s', $this->osType, $contents);
+            Log::error($errorMessage);
+            throw new \Exception($errorMessage);
+        }
+
+        $contents = json_decode($contents, true);
+
+        // map external api response to our enum field of table
+        return SubscriptionStatusMapper::mapper[$contents['response']['expire-status']];
     }
 
     /**
