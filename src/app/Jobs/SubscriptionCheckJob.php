@@ -35,22 +35,33 @@ class SubscriptionCheckJob implements ShouldQueue
      */
     public function handle()
     {
-        $application = $this->device->applications->first();
+        try {
 
-        // Factory
-        $osTypeObj = OsTypeFactory::create($this->device->os, $application->id);
-        $expireDateStatus = $osTypeObj->getSubscription($this->device->token);
+            $application = $this->device->applications->first();
 
-        $pivot = $application->pivot;
+            // Factory
+            $osTypeObj = OsTypeFactory::create($this->device->os, $application->id);
+            $expireDateStatus = $osTypeObj->getSubscription($this->device->token);
 
-        if ($pivot->subscriptio_status !== $expireDateStatus) {
+            $pivot = $application->pivot;
 
-            $this->deviceRepository->setSubscription([
-                'application_id'      => $this->device->applications->first()->id,
-                'device_id'           => $this->device->id,
-                'subscription_status' => $expireDateStatus,
-            ]);
+            if ($pivot->subscriptio_status !== $expireDateStatus) {
 
+                $this->deviceRepository->setSubscription([
+                    'application_id'      => $this->device->applications->first()->id,
+                    'device_id'           => $this->device->id,
+                    'subscription_status' => $expireDateStatus,
+                ]);
+
+            }
+
+        } catch (\Throwable $e) {
+            // it is caused because of rate-limit in calling API
+            // retry hourly
+            if ($this->attempts() < 24) {
+                $delayInSeconds = 60 * 60;
+                $this->release($delayInSeconds);
+            }
         }
     }
 }
