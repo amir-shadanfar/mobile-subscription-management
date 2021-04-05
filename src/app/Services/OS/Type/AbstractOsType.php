@@ -4,6 +4,7 @@ namespace App\Services\OS\Type;
 
 use App\Repositories\OsCredential\OsCredentialRepository;
 use App\Services\OS\Api\OsApiFactory;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -64,6 +65,23 @@ abstract class AbstractOsType implements OsTypeInterface
         }
 
         $contents = json_decode($contents, true);
-        return $contents['response']['expire-date'];
+        $expireDateSource = $contents['response']['expire-date'];
+
+        return $this->convertTimezones($expireDateSource);
+    }
+
+    /**
+     * convert receiving expire-date to UTC in order to check on
+     * cron job to compare server timezone(UTC) with expire-date
+     * @param $timestamp
+     * @return string
+     */
+    private function convertTimezones($timestamp)
+    {
+        $sourceTimeZone = '-6:00';
+        $destinationTimeZone = config('app.timezone');
+        $sourceTimeStamp = Carbon::createFromFormat('Y-m-d H:i:s', $timestamp, $sourceTimeZone);
+
+        return $sourceTimeStamp->setTimezone($destinationTimeZone)->toDateTimeString();
     }
 }

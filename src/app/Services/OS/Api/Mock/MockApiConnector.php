@@ -61,15 +61,15 @@ class MockApiConnector extends RealApiConnector
 
         if ($this->isRateLimitFire($receipt)) {
             return Http::response([
-                'status'   => false,
-                'message'  => 'Api is reached the rate limit'
+                'status'  => false,
+                'message' => 'Api is reached the rate limit'
             ], 429);
         }
 
         if (!$this->isValidReceipt($receipt)) {
             return Http::response([
-                'status'   => false,
-                'message'  => 'Receipt is not valid'
+                'status'  => false,
+                'message' => 'Receipt is not valid'
             ], 429);
         }
 
@@ -77,8 +77,7 @@ class MockApiConnector extends RealApiConnector
         return Http::response([
             'status'   => true,
             'response' => [
-                'expire-date' => Carbon::parse($this->faker->dateTimeThisYear, 'UTC -6')
-                    ->format('Y-m-d H:i:s')
+                'expire-date' => Carbon::createFromFormat('Y-m-d H:i:s', '2021-02-18 11:11:59', "-6:00")->toDateTimeString()
             ]
         ], 200);
     }
